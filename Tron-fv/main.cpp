@@ -1,51 +1,27 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
+
+#define W 600
+#define H 480
 #define kVel 1
+
+#include "Player.h"
 
 int main()
 {
-    float posx =300;
-    float posy =240;
-    
-    int dirx = 0;
-    int diry = 1;
-    
-    int mapa[600][480];
-    for(int mx = 0; mx < 600;mx++){
-            for(int my = 0; my < 480;my++){
-                mapa[mx][my] = 0;
-            }
-        }
-    
     //Creamos una ventana 
-    sf::RenderWindow window(sf::VideoMode(600, 480), "T.R.O.N");
+    sf::RenderWindow window(sf::VideoMode(W, H), "T.R.O.N");
     
+    //LLAMAR CONSTRUCTOR PLAYER
+    Player p1(0,sf::Color::Cyan);
     
     //Cargo la imagen donde reside la textura del sprite
-    sf::Texture tex;
-    if (!tex.loadFromFile("resources/sprites-tron-sf.png"))
-    {
-        std::cerr << "Error cargando la imagen sprites.png";
-        exit(0);
-    }
-    
     sf::Texture tex2;
     tex2.loadFromFile("resources/background.jpg");
     
-    
     //Y creo el spritesheet a partir de la imagen anterior
-    sf::Sprite sprite(tex);
     sf::Sprite s_background(tex2);
-    
-    //Le pongo el centroide donde corresponde
-    sprite.setOrigin(32/2,32/2);
-    //Cojo el sprite que me interesa por defecto del sheet
-    sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
-    
-    // Lo dispongo en el centro de la pantalla
-    sprite.setPosition(posx, posy);
-    
 
     //Bucle del juego
     while (window.isOpen())
@@ -54,7 +30,6 @@ int main()
         sf::Event event;
         while (window.pollEvent(event))
         {
-            
             switch(event.type){
                 
                 //Si se recibe el evento de cerrar la ventana la cierro
@@ -70,32 +45,24 @@ int main()
                         
                         //Mapeo del cursor
                         case sf::Keyboard::Right:
-                            sprite.setTextureRect(sf::IntRect(1*32, 0*32, 32, 32));
-                            //Escala por defecto
-                            sprite.setScale(1,1);
-                            dirx = 1;
-                            diry = 0;
+                            p1.cambiar_posicion_sprite(1,1);
+                            p1.set_dir(1,0);
                         break;
 
-                        case sf::Keyboard::Left:
-                            sprite.setTextureRect(sf::IntRect(1*32, 0*32, 32, 32));
-                            //Reflejo vertical
-                            sprite.setScale(-1,1);
-                            dirx = -1;
-                            diry = 0;
+                        case sf::Keyboard::Left:                      
+                            p1.cambiar_posicion_sprite(1,-1);
+                            p1.set_dir(-1,0);
                         break;
                         
                         case sf::Keyboard::Up:
-                            sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
-                            dirx = 0;
-                            diry = -1; 
+                            p1.cambiar_posicion_sprite(0,1);
+                            
+                            p1.set_dir(0,-1);
                         break;
                         
                         case sf::Keyboard::Down:
-                            sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
-                            sprite.setScale(1,-1);
-                            dirx = 0;
-                            diry = 1;  
+                            p1.cambiar_posicion_sprite(0,-1);
+                            p1.set_dir(0,1);
                         break;
                         
                         //Tecla ESC para salir
@@ -113,26 +80,23 @@ int main()
             }
             
         }
-        mapa[(int)posx][(int)posy] = 1;
-        mapa[(int)posx][(int)posy] = 1;
         
         
-        posx = posx + kVel * dirx;
-        posy = posy + kVel * diry;
-        
-        if(posx < 0){ posx = 600; }
-        if(posx > 600){ posx = 0; }
-        if(posy < 0){ posy = 480; }
-        if(posy > 480){ posy = 0; }
-        
-        sprite.setPosition(posx,posy);
+        p1.movimiento_controlado();
 
         window.clear();
         window.draw(s_background);
         
-        for(int mx = 0; mx < 600;mx++){
-            for(int my = 0; my < 480;my++){
-                if(mapa[mx][my] == 1){
+        int mapa_rastro[W][H];
+        for(int mx = 0; mx < W;mx++){
+            for(int my = 0; my < H;my++){
+                mapa_rastro[mx][my] = p1.getMapa_rastro(mx,my);
+            }
+        }
+        
+        for(int mx = 0; mx < W;mx++){
+            for(int my = 0; my < H;my++){
+                if(mapa_rastro[mx][my] == 1){
                     sf::CircleShape rastro(2.f);
                     rastro.setFillColor(sf::Color::Cyan);
                     rastro.setOrigin(2.f,2.f);
@@ -142,7 +106,7 @@ int main()
             }
         }
         
-        window.draw(sprite);  
+        window.draw(p1.getSprite());  
         window.display();
     }
 

@@ -17,21 +17,35 @@
 
 class Player{
     private:
-        int x;
-        int y;
+        float posx;
+        float posy;
+        int dirx;
+        int diry;
+        int mapa_rastro[W][H];
         sf::Sprite sprite;
         sf::Color color;
     public:
-        Player(sf::Color, int, int);
+        Player(int, sf::Color);
         void movimiento_automatico();
-        void movimiento_controlado(sf::Event *event,sf::RenderWindow *window);
+        void cambiar_posicion_sprite(int,int);
+        void movimiento_controlado();
+        void set_dir(int,int);
+        int getMapa_rastro(int,int);
         sf::Sprite getSprite();
 };
 
-Player::Player(sf::Color _color, int nx_sprite , int ny_sprite){
-    x = rand() % W;
-    y = rand() % H;
-    color = _color;
+Player::Player(int _pos_sprite, sf::Color _color){
+    
+    posx =300;
+    posy =240;
+    dirx = 0;
+    diry = 1;
+    
+    for(int mx = 0; mx < W;mx++){
+            for(int my = 0; my < H;my++){
+                mapa_rastro[mx][my] = 0;
+            }
+    }
     
     sf::Texture tex;
     if (!tex.loadFromFile("resources/sprites-tron-sf.png"))
@@ -39,54 +53,59 @@ Player::Player(sf::Color _color, int nx_sprite , int ny_sprite){
         std::cerr << "Error cargando la imagen sprites.png";
         exit(0);
     }
-    
     sprite = sf::Sprite(tex);
+    //Le pongo el centroide donde corresponde
     sprite.setOrigin(32/2,32/2);
-    sprite.setTextureRect(sf::IntRect(nx_sprite*32,ny_sprite*32,32,32));
-    sprite.setPosition(x,y);
+    //Cojo el sprite que me interesa por defecto del sheet
+    sprite.setTextureRect(sf::IntRect(0*32, _pos_sprite*32, 32, 32));
+    
+    // Lo dispongo en el centro de la pantalla
+    sprite.setPosition(posx, posy);
+    
+    
 }
 
-void Player::movimiento_controlado(sf::Event *event,sf::RenderWindow *window){
-//Verifico si se pulsa alguna tecla de movimiento
-    switch(*event->key.code) {
-                        
-        //Mapeo del cursor
-        case sf::Keyboard::Right:
-            sprite.setTextureRect(sf::IntRect(1*32, 0*32, 32, 32));
-            //Escala por defecto
-            sprite.setScale(1,1);
-            sprite.move(kVel,0);
-        break;
-
-        case sf::Keyboard::Left:
-            sprite.setTextureRect(sf::IntRect(1*32, 0*32, 32, 32));
-            //Reflejo vertical
-            sprite.setScale(-1,1);
-            sprite.move(-kVel,0); 
-        break;
-                        
-        case sf::Keyboard::Up:
-            sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
-            sprite.move(0,-kVel); 
-        break;
-                        
-        case sf::Keyboard::Down:
-            sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
-            sprite.setScale(1,-1);
-            sprite.move(0,kVel); 
-        break;
-                              
-                        
-        //Tecla ESC para salir
-        case sf::Keyboard::Escape:
-            *window->close();
-        break;
-                        
-        //Cualquier tecla desconocida se imprime por pantalla su código
-        default:
-            std::cout << *event->key.code << std::endl;
-        break;                  
+void Player::cambiar_posicion_sprite(int _posicion, int _direccion){
+    //_posicion     0 == UP/DOWN     1 == RIGHT/LEFT
+    
+    //_direccion    1 == RIGHT/UP   -1 == LEFT/DOWN
+    
+    sprite.setTextureRect(sf::IntRect(_posicion*32, 0*32, 32, 32));
+    //Escala por defecto
+    
+    if(_posicion == 0){
+        sprite.setScale(1,_direccion);
     }
+    
+    if(_posicion == 1){
+        sprite.setScale(_direccion,1);
+    }
+    
+}
+
+
+void Player::movimiento_controlado(){
+        mapa_rastro[(int)posx][(int)posy] = 1;
+        mapa_rastro[(int)posx][(int)posy] = 1;
+        
+        posx = posx + kVel * dirx;
+        posy = posy + kVel * diry;
+        
+        if(posx < 0){ posx = W; }
+        if(posx > 600){ posx = 0; }
+        if(posy < 0){ posy = H; }
+        if(posy > 480){ posy = 0; }
+        
+        sprite.setPosition(posx,posy);
+}
+
+void Player::set_dir(int _dirx,int _diry){
+    dirx = _dirx;
+    diry = _diry;
+}
+
+int Player::getMapa_rastro(int _x, int _y){
+    return mapa_rastro[_x][_y];
 }
 
 sf::Sprite Player::getSprite(){
