@@ -1,7 +1,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
-#define kVel 1
+#define kVel 0
 
 int main()
 {
@@ -16,7 +16,8 @@ int main()
             for(int my = 0; my < 480;my++){
                 mapa[mx][my] = 0;
             }
-        }
+    }
+    
     
     //Creamos una ventana 
     sf::RenderWindow window(sf::VideoMode(600, 480), "T.R.O.N");
@@ -130,17 +131,15 @@ int main()
         window.clear();
         window.draw(s_background);
         
-        for(int mx = 0; mx < 600;mx++){
+        
+         for(int mx = 0; mx < 600;mx++){
             for(int my = 0; my < 480;my++){
                 if(mapa[mx][my] == 1){
-                    sf::CircleShape rastro(2.f);
-                    rastro.setFillColor(sf::Color::Cyan);
-                    rastro.setOrigin(2.f,2.f);
-                    rastro.setPosition(mx,my);
-                    window.draw(rastro);
+                    //window.draw(mapa_rastro[mx][my]);
                 }
             }
         }
+         
         
         window.draw(sprite);  
         window.display();
