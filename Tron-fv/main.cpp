@@ -7,21 +7,14 @@
 #define kVel 4
 #define ancho_morro 20
 
+#include "Coche.h"
+
 int main()
 {
     sf::Clock clock;
     
-    int posx =W/2;
-    int posy =H/2;
-    
-    int posr_x;
-    int posr_y;
-    
-    int cord_morrox;
-    int cord_morroy;
-    
-    int dirx = 0;
-    int diry = -1;
+    //DECLARAMOS LOS COCHES
+    Coche coche1 = Coche(0);
     
     int mapa[W][H];
     for(int mx = 0; mx < W;mx++){
@@ -40,41 +33,20 @@ int main()
             }
     }
     
-    
-    //MORRO
-    sf::RectangleShape morro = sf::RectangleShape(sf::Vector2f(ancho_morro, 1));
-    morro.setOrigin(ancho_morro/2,1);
-    morro.setFillColor(sf::Color::Red);
-    
     //Creamos una ventana 
     sf::RenderWindow window(sf::VideoMode(W, H), "T.R.O.N");
-    
-    
-    //Cargo la imagen donde reside la textura del sprite
-    sf::Texture tex;
-    if (!tex.loadFromFile("resources/sprites-tron-sf2.png"))
-    {
-        std::cerr << "Error cargando la imagen sprites.png";
-        exit(0);
-    }
     
     sf::Texture tex2;
     tex2.loadFromFile("resources/background.jpg");
     
-    
     //Y creo el spritesheet a partir de la imagen anterior
-    sf::Sprite sprite(tex);
-    sf::Sprite s_background(tex2);
-    
-    //Le pongo el centroide donde corresponde
-    sprite.setOrigin(32/2,32/2);
-    //Cojo el sprite que me interesa por defecto del sheet
-    sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
-    
-    // Lo dispongo en el centro de la pantalla
-    sprite.setPosition(posx, posy);
-    
 
+    sf::Sprite s_background(tex2);
+
+    
+    //Creo los coches
+    
+    
     //Bucle del juego
     while (window.isOpen())
     {
@@ -99,45 +71,37 @@ int main()
                         
                         //Mapeo del cursor
                         case sf::Keyboard::Right:
-                            if(dirx == -1 && diry == 0){}
+                            if(coche1.get_dirx() == -1 && coche1.get_diry() == 0){}
                             else{
-                                 sprite.setTextureRect(sf::IntRect(1*32, 0*32, 32, 32));
-                                //Escala por defecto
-                                sprite.setScale(1,1);
-                                dirx = 1;
-                                diry = 0;  
+                                coche1.set_dir(1,0);
+                                coche1.cambiar_posicion_sprite(1,1);
                             }
                         break;
 
                         case sf::Keyboard::Left:
-                            if(dirx == 1 && diry == 0){}
+                            if(coche1.get_dirx() == 1 && coche1.get_diry() == 0){}
                             else{
-                                sprite.setTextureRect(sf::IntRect(1*32, 0*32, 32, 32));
-                                sprite.setScale(-1,1);
-                                dirx = -1;
-                                diry = 0;
+                                coche1.set_dir(-1,0);
+                                coche1.cambiar_posicion_sprite(1,-1);
                             }
                             //Reflejo vertical
                             
                         break;
                         
                         case sf::Keyboard::Up:
-                            if(dirx == 0 && diry == 1){}
+                            if(coche1.get_dirx() == 0 && coche1.get_diry() == 1){}
                             else{
-                                sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
-                                dirx = 0;
-                                diry = -1; 
+                                coche1.set_dir(0,-1);
+                                coche1.cambiar_posicion_sprite(0,1);
                             }
                             
                         break;
                         
                         case sf::Keyboard::Down:
-                            if(dirx == 0 && diry == -1){}
+                            if(coche1.get_dirx() == 0 && coche1.get_diry() == -1){}
                             else{
-                                sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
-                                sprite.setScale(1,-1);
-                                dirx = 0;
-                                diry = 1;  
+                                coche1.set_dir(0,1); 
+                                coche1.cambiar_posicion_sprite(0,-1);
                             }
                             
                         break;
@@ -158,12 +122,111 @@ int main()
             
         }
         
+        coche1.movimiento_controlado();
+        coche1.situar_morro();
+        
+        mapa[coche1.get_x()][coche1.get_y()] = 1;
         
         
+        window.clear();
+        window.draw(s_background);
         
         
+         for(int mx = 0; mx < W;mx++){
+            for(int my = 0; my < H;my++){
+                if(mapa[mx][my] == 1){
+                    
+                    if(coche1.getMorro().getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
+                        std::cout << "HAS PERDIDO :( \n" ;
+                        window.close();
+                        break;
+                    }
+                    window.draw(mapa_rastro[mx/4][my/4]);
+                }
+            }
+        }
+         
+        //sf::Sprite *sprite = coche1.getSprite(); 
+        //window.draw(*sprite);
         
+        window.draw(coche1.getSprite());
+        window.draw(coche1.getMorro()); //VER COLISIONADOR DEL COCHE
+        window.display();
         
+        sf::Time tiempo = sf::milliseconds(0);
+        sf::Time tiempo_max = sf::milliseconds(30);
+        while (tiempo < tiempo_max){
+            tiempo = clock.getElapsedTime();
+        }
+       
+    }
+    
+    return 0;
+}
+
+Coche::Coche(int _njugador){
+    
+    n_jugador = _njugador;
+    if(n_jugador == 0){
+        color = sf::Color::Cyan;
+    }
+    else{
+        color = sf::Color::Yellow;
+    }
+    
+    posx =W/2;
+    posy =H/2;
+    cord_morrox;
+    cord_morroy;
+    dirx = 0;
+    diry = -1;
+    
+    morro = sf::RectangleShape(sf::Vector2f(ancho_morro, 1));
+    morro.setOrigin(ancho_morro/2,1);
+    morro.setFillColor(sf::Color::Red);
+    
+        
+    //Cargo la imagen donde reside la textura del sprite
+    sf::Texture tex;
+    if (!tex.loadFromFile("resources/sprites-tron-sf2.png"))
+    {
+        std::cerr << "Error cargando la imagen sprites.png";
+        exit(0);
+    }
+    sprite = sf::Sprite(tex);
+    
+    //Le pongo el centroide donde corresponde
+    sprite.setOrigin(32/2,32/2);
+    //Cojo el sprite que me interesa por defecto del sheet
+    sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
+    
+    // Lo dispongo en el centro de la pantalla
+    sprite.setPosition(posx, posy);
+    
+    
+}
+
+
+void Coche::cambiar_posicion_sprite(int _posicion, int _direccion){
+    //_posicion     0 == UP/DOWN     1 == RIGHT/LEFT 
+     
+    //_direccion    1 == RIGHT/UP   -1 == LEFT/DOWN 
+     
+    sprite.setTextureRect(sf::IntRect(_posicion*32, n_jugador*32, 32, 32));
+    
+    if(_posicion == 0){ 
+        sprite.setScale(1,_direccion); 
+    } 
+     
+    if(_posicion == 1){ 
+        sprite.setScale(_direccion,1); 
+    } 
+    //Escala por defecto 
+     
+}
+
+void Coche::movimiento_controlado(){
+    
         posx = posx + kVel * dirx;
         posy = posy + kVel * diry;
 
@@ -174,6 +237,10 @@ int main()
         
         sprite.setPosition(posx,posy);
         
+}
+
+void Coche::situar_morro(){
+            
         if(dirx == 1){//derecha
            cord_morrox = posx+16; 
            cord_morroy = posy;
@@ -207,43 +274,37 @@ int main()
            morro.setSize(sf::Vector2f(ancho_morro, 1));
            morro.setPosition(cord_morrox,cord_morroy);   
         }
-        
-        
-        
-        
-        mapa[posx][posy] = 1;
-        
-        
-        window.clear();
-        window.draw(s_background);
-        
-        
-         for(int mx = 0; mx < W;mx++){
-            for(int my = 0; my < H;my++){
-                if(mapa[mx][my] == 1){
-                    
-                    if(morro.getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
-                        std::cout << "HAS PERDIDO :( \n" ;
-                        window.close();
-                        break;
-                    }
-                    window.draw(mapa_rastro[mx/4][my/4]);
-                }
-            }
-        }
-         
-        
-        window.draw(sprite);
-        //window.draw(morro); VER COLISIONADOR DEL COCHE
-        window.display();
-        
-        sf::Time tiempo = sf::milliseconds(0);
-        sf::Time tiempo_max = sf::milliseconds(30);
-        while (tiempo < tiempo_max){
-            tiempo = clock.getElapsedTime();
-        }
-       
-    }
-    
-    return 0;
+}
+
+void Coche::set_dir(int _dirx, int _diry){
+    dirx = _dirx;
+    diry = _diry;
+}
+
+/*sf::Sprite* Coche::getSprite(){
+    return &sprite;
+}*/
+
+sf::Sprite Coche::getSprite(){
+    return sprite;
+}
+
+sf::RectangleShape Coche::getMorro(){
+    return morro;
+}
+
+int Coche::get_dirx(){
+    return dirx;
+}
+
+int Coche::get_diry(){
+    return diry;
+}
+
+int Coche::get_x(){
+    return posx;
+}
+
+int Coche::get_y(){
+    return posy;
 }
