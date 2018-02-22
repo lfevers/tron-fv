@@ -15,6 +15,7 @@ int main()
     
     //DECLARAMOS LOS COCHES
     Coche coche1 = Coche(0);
+    Coche coche2 = Coche(1);
     
     int mapa[W][H];
     for(int mx = 0; mx < W;mx++){
@@ -27,7 +28,6 @@ int main()
     for(int mx = 0; mx < W/4;mx++){
             for(int my = 0; my < H/4;my++){
                 mapa_rastro[mx][my] = sf::RectangleShape(sf::Vector2f(4, 4));
-                mapa_rastro[mx][my].setFillColor(sf::Color::Cyan);
                 mapa_rastro[mx][my].setOrigin(2,2);
                 mapa_rastro[mx][my].setPosition(mx*4,my*4);
             }
@@ -43,10 +43,6 @@ int main()
 
     sf::Sprite s_background(tex2);
 
-    
-    //Creo los coches
-    
-    
     //Bucle del juego
     while (window.isOpen())
     {
@@ -75,6 +71,8 @@ int main()
                             else{
                                 coche1.set_dir(1,0);
                                 coche1.cambiar_posicion_sprite(1,1);
+                                coche2.set_dir(1,0);
+                                coche2.cambiar_posicion_sprite(1,1);
                             }
                         break;
 
@@ -83,6 +81,8 @@ int main()
                             else{
                                 coche1.set_dir(-1,0);
                                 coche1.cambiar_posicion_sprite(1,-1);
+                                coche2.set_dir(-1,0);
+                                coche2.cambiar_posicion_sprite(1,-1);
                             }
                             //Reflejo vertical
                             
@@ -93,6 +93,8 @@ int main()
                             else{
                                 coche1.set_dir(0,-1);
                                 coche1.cambiar_posicion_sprite(0,1);
+                                coche2.set_dir(0,-1);
+                                coche2.cambiar_posicion_sprite(0,1);
                             }
                             
                         break;
@@ -102,6 +104,8 @@ int main()
                             else{
                                 coche1.set_dir(0,1); 
                                 coche1.cambiar_posicion_sprite(0,-1);
+                                coche2.set_dir(0,1); 
+                                coche2.cambiar_posicion_sprite(0,-1);
                             }
                             
                         break;
@@ -125,8 +129,11 @@ int main()
         coche1.movimiento_controlado();
         coche1.situar_morro();
         
-        mapa[coche1.get_x()][coche1.get_y()] = 1;
+        coche2.movimiento_controlado();
+        coche2.situar_morro();
         
+        mapa[coche1.get_x()][coche1.get_y()] = 1;
+        mapa[coche2.get_x()][coche2.get_y()] = 2;
         
         window.clear();
         window.draw(s_background);
@@ -141,8 +148,33 @@ int main()
                         window.close();
                         break;
                     }
+                    
+                    if(coche2.getMorro().getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
+                        std::cout << "HAS GANADO :) \n" ;
+                        window.close();
+                        break;
+                    }
+                    mapa_rastro[mx/4][my/4].setFillColor(coche1.getColor());
                     window.draw(mapa_rastro[mx/4][my/4]);
                 }
+                
+                if(mapa[mx][my] == 2){
+                    
+                    if(coche2.getMorro().getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
+                        std::cout << "HAS GANADO :) \n" ;
+                        window.close();
+                        break;
+                    }
+                    
+                    if(coche1.getMorro().getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
+                        std::cout << "HAS PERDIDO :( \n" ;
+                        window.close();
+                        break;
+                    }
+                    mapa_rastro[mx/4][my/4].setFillColor(coche2.getColor());
+                    window.draw(mapa_rastro[mx/4][my/4]);
+                }
+                
             }
         }
          
@@ -151,6 +183,10 @@ int main()
         
         window.draw(coche1.getSprite());
         window.draw(coche1.getMorro()); //VER COLISIONADOR DEL COCHE
+        
+        window.draw(coche2.getSprite());
+        window.draw(coche2.getMorro()); //VER COLISIONADOR DEL COCHE
+        
         window.display();
         
         sf::Time tiempo = sf::milliseconds(0);
@@ -169,13 +205,16 @@ Coche::Coche(int _njugador){
     n_jugador = _njugador;
     if(n_jugador == 0){
         color = sf::Color::Cyan;
+        posx =W/2;
+        posy =H/2;
     }
     else{
         color = sf::Color::Yellow;
+        posx =W/4;
+        posy =H/4;
     }
     
-    posx =W/2;
-    posy =H/2;
+    
     cord_morrox;
     cord_morroy;
     dirx = 0;
@@ -291,6 +330,10 @@ sf::Sprite Coche::getSprite(){
 
 sf::RectangleShape Coche::getMorro(){
     return morro;
+}
+
+sf::Color Coche::getColor(){
+    return color;
 }
 
 int Coche::get_dirx(){

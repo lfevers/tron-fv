@@ -36,6 +36,7 @@ public:
     //sf::Sprite* getSprite();
     sf::Sprite getSprite();
     sf::RectangleShape getMorro();
+    sf::Color getColor();
     int get_dirx();
     int get_diry();
     int get_x();
