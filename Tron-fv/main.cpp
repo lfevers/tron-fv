@@ -5,16 +5,20 @@
 #define W 600
 #define H 480
 #define kVel 4
+#define ancho_morro 20
 
 int main()
 {
     sf::Clock clock;
     
-    float posx =W/2;
-    float posy =H/2;
+    int posx =W/2;
+    int posy =H/2;
     
     int posr_x;
     int posr_y;
+    
+    int cord_morrox;
+    int cord_morroy;
     
     int dirx = 0;
     int diry = -1;
@@ -35,6 +39,12 @@ int main()
                 mapa_rastro[mx][my].setPosition(mx*4,my*4);
             }
     }
+    
+    
+    //MORRO
+    sf::RectangleShape morro = sf::RectangleShape(sf::Vector2f(ancho_morro, 1));
+    morro.setOrigin(ancho_morro/2,1);
+    morro.setFillColor(sf::Color::Red);
     
     //Creamos una ventana 
     sf::RenderWindow window(sf::VideoMode(W, H), "T.R.O.N");
@@ -89,32 +99,47 @@ int main()
                         
                         //Mapeo del cursor
                         case sf::Keyboard::Right:
-                            sprite.setTextureRect(sf::IntRect(1*32, 0*32, 32, 32));
-                            //Escala por defecto
-                            sprite.setScale(1,1);
-                            dirx = 1;
-                            diry = 0;
+                            if(dirx == -1 && diry == 0){}
+                            else{
+                                 sprite.setTextureRect(sf::IntRect(1*32, 0*32, 32, 32));
+                                //Escala por defecto
+                                sprite.setScale(1,1);
+                                dirx = 1;
+                                diry = 0;  
+                            }
                         break;
 
                         case sf::Keyboard::Left:
-                            sprite.setTextureRect(sf::IntRect(1*32, 0*32, 32, 32));
+                            if(dirx == 1 && diry == 0){}
+                            else{
+                                sprite.setTextureRect(sf::IntRect(1*32, 0*32, 32, 32));
+                                sprite.setScale(-1,1);
+                                dirx = -1;
+                                diry = 0;
+                            }
                             //Reflejo vertical
-                            sprite.setScale(-1,1);
-                            dirx = -1;
-                            diry = 0;
+                            
                         break;
                         
                         case sf::Keyboard::Up:
-                            sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
-                            dirx = 0;
-                            diry = -1; 
+                            if(dirx == 0 && diry == 1){}
+                            else{
+                                sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
+                                dirx = 0;
+                                diry = -1; 
+                            }
+                            
                         break;
                         
                         case sf::Keyboard::Down:
-                            sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
-                            sprite.setScale(1,-1);
-                            dirx = 0;
-                            diry = 1;  
+                            if(dirx == 0 && diry == -1){}
+                            else{
+                                sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
+                                sprite.setScale(1,-1);
+                                dirx = 0;
+                                diry = 1;  
+                            }
+                            
                         break;
                         
                         //Tecla ESC para salir
@@ -132,10 +157,15 @@ int main()
             }
             
         }
+        
+        
+        
+        
+        
+        
+        
         posx = posx + kVel * dirx;
         posy = posy + kVel * diry;
-        
-        mapa[(int)posx][(int)posy] = 1;
 
         if(posx < 0){ posx = W; }
         if(posx > W){ posx = 0; }
@@ -143,7 +173,47 @@ int main()
         if(posy > H){ posy = 0; }
         
         sprite.setPosition(posx,posy);
-
+        
+        if(dirx == 1){//derecha
+           cord_morrox = posx+16; 
+           cord_morroy = posy;
+           morro.setOrigin(1,ancho_morro/2);
+           morro.setSize(sf::Vector2f(1, ancho_morro));
+           morro.setPosition(cord_morrox,cord_morroy);
+          
+           
+        }
+        if(dirx == -1){//izquierda
+           cord_morrox = posx-16; 
+           cord_morroy = posy;
+           morro.setOrigin(1,ancho_morro/2);
+           morro.setSize(sf::Vector2f(1, ancho_morro));
+           morro.setPosition(cord_morrox,cord_morroy);
+           
+           
+        }
+        if(diry == 1){//abajo
+           cord_morrox = posx; 
+           cord_morroy = posy +16;
+           morro.setOrigin(ancho_morro/2,1);
+           morro.setSize(sf::Vector2f(ancho_morro, 1));
+           morro.setPosition(cord_morrox,cord_morroy);
+           
+        }
+        if(diry == -1){//arriba
+           cord_morrox = posx; 
+           cord_morroy = posy -16;
+           morro.setOrigin(ancho_morro/2,1);
+           morro.setSize(sf::Vector2f(ancho_morro, 1));
+           morro.setPosition(cord_morrox,cord_morroy);   
+        }
+        
+        
+        
+        
+        mapa[posx][posy] = 1;
+        
+        
         window.clear();
         window.draw(s_background);
         
@@ -151,15 +221,21 @@ int main()
          for(int mx = 0; mx < W;mx++){
             for(int my = 0; my < H;my++){
                 if(mapa[mx][my] == 1){
+                    
+                    if(morro.getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
+                        std::cout << "HAS PERDIDO :( \n" ;
+                        window.close();
+                        break;
+                    }
                     window.draw(mapa_rastro[mx/4][my/4]);
                 }
             }
         }
          
         
-        window.draw(sprite);  
+        window.draw(sprite);
+        //window.draw(morro); VER COLISIONADOR DEL COCHE
         window.display();
-        
         
         sf::Time tiempo = sf::milliseconds(0);
         sf::Time tiempo_max = sf::milliseconds(30);
