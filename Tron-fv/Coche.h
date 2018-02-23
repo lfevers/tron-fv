@@ -17,6 +17,7 @@
 class Coche{
 private:
     int n_jugador;
+    sf::Texture tex;
     sf::Sprite sprite;
     int posx;
     int posy;
@@ -31,6 +32,7 @@ public:
     Coche(int);
     void cambiar_posicion_sprite(int,int);
     void movimiento_controlado();
+    void movimiento_automatico(int[W][H]);
     void situar_morro();
     void set_dir(int,int);
     //sf::Sprite* getSprite();

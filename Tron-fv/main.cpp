@@ -71,8 +71,6 @@ int main()
                             else{
                                 coche1.set_dir(1,0);
                                 coche1.cambiar_posicion_sprite(1,1);
-                                coche2.set_dir(1,0);
-                                coche2.cambiar_posicion_sprite(1,1);
                             }
                         break;
 
@@ -81,8 +79,6 @@ int main()
                             else{
                                 coche1.set_dir(-1,0);
                                 coche1.cambiar_posicion_sprite(1,-1);
-                                coche2.set_dir(-1,0);
-                                coche2.cambiar_posicion_sprite(1,-1);
                             }
                             //Reflejo vertical
                             
@@ -93,8 +89,6 @@ int main()
                             else{
                                 coche1.set_dir(0,-1);
                                 coche1.cambiar_posicion_sprite(0,1);
-                                coche2.set_dir(0,-1);
-                                coche2.cambiar_posicion_sprite(0,1);
                             }
                             
                         break;
@@ -104,8 +98,6 @@ int main()
                             else{
                                 coche1.set_dir(0,1); 
                                 coche1.cambiar_posicion_sprite(0,-1);
-                                coche2.set_dir(0,1); 
-                                coche2.cambiar_posicion_sprite(0,-1);
                             }
                             
                         break;
@@ -129,7 +121,7 @@ int main()
         coche1.movimiento_controlado();
         coche1.situar_morro();
         
-        coche2.movimiento_controlado();
+        coche2.movimiento_automatico(mapa);
         coche2.situar_morro();
         
         mapa[coche1.get_x()][coche1.get_y()] = 1;
@@ -203,22 +195,9 @@ int main()
 Coche::Coche(int _njugador){
     
     n_jugador = _njugador;
-    if(n_jugador == 0){
-        color = sf::Color::Cyan;
-        posx =W/2;
-        posy =H/2;
-    }
-    else{
-        color = sf::Color::Yellow;
-        posx =W/4;
-        posy =H/4;
-    }
-    
-    
+       
     cord_morrox;
     cord_morroy;
-    dirx = 0;
-    diry = -1;
     
     morro = sf::RectangleShape(sf::Vector2f(ancho_morro, 1));
     morro.setOrigin(ancho_morro/2,1);
@@ -226,7 +205,6 @@ Coche::Coche(int _njugador){
     
         
     //Cargo la imagen donde reside la textura del sprite
-    sf::Texture tex;
     if (!tex.loadFromFile("resources/sprites-tron-sf2.png"))
     {
         std::cerr << "Error cargando la imagen sprites.png";
@@ -237,7 +215,22 @@ Coche::Coche(int _njugador){
     //Le pongo el centroide donde corresponde
     sprite.setOrigin(32/2,32/2);
     //Cojo el sprite que me interesa por defecto del sheet
-    sprite.setTextureRect(sf::IntRect(0*32, 0*32, 32, 32));
+    sprite.setTextureRect(sf::IntRect(0*32, n_jugador*32, 32, 32));
+    
+    if(n_jugador == 0){
+        color = sf::Color::Cyan;
+        posx =320;
+        posy =440;
+        dirx = 0;
+        diry = -1;
+    }
+    else{
+        color = sf::Color::Yellow;
+        posx =320;
+        posy =40;
+        dirx = 0;
+        diry = 1;
+    }
     
     // Lo dispongo en el centro de la pantalla
     sprite.setPosition(posx, posy);
@@ -276,6 +269,67 @@ void Coche::movimiento_controlado(){
         
         sprite.setPosition(posx,posy);
         
+}
+
+void Coche::movimiento_automatico(int _mapa[W][H]){
+    int pos_sx = cord_morrox + 4*dirx;
+    int pos_sy = cord_morroy + 4*diry;
+    std::cout << "MAPA: " << pos_sx << ","<<  pos_sy << ": " << _mapa[pos_sx][pos_sy] <<" \n";
+    if(cord_morrox > 599){cord_morrox = 0 + cord_morrox - W; }
+    if(cord_morrox < 0){cord_morrox = W - cord_morrox; }
+    
+    std::cout << "pos: " << posx << ","<<  posy << " \n";
+    std::cout << "MAPA: " << pos_sx << ","<<  pos_sy << ": " << _mapa[pos_sx][pos_sy] <<" \n";
+    
+    if(_mapa[pos_sx][pos_sy] > 0){
+        std::cout << "giro1" << "\n";
+        set_dir(1,0);
+        cambiar_posicion_sprite(1,1);
+        pos_sx = cord_morrox + 4*dirx;
+        pos_sy = cord_morroy + 4*diry;
+        if(cord_morrox > 599){cord_morrox = 0 + cord_morrox - W; }
+        if(cord_morrox < 0){cord_morrox = W - cord_morrox; }
+    }
+    if(_mapa[pos_sx][pos_sy] > 0){
+        std::cout << "giro2" << "\n";
+        set_dir(-1,0);
+        cambiar_posicion_sprite(1,-1);
+        pos_sx = cord_morrox + 4*dirx;
+        pos_sy = cord_morroy + 4*diry;
+        if(cord_morrox > 599){cord_morrox = 0 + cord_morrox - W; }
+        if(cord_morrox < 0){cord_morrox = W - cord_morrox; }
+    }
+    if(_mapa[pos_sx][pos_sy] > 0){
+        std::cout << "giro3" << "\n";
+        set_dir(0,-1);
+        cambiar_posicion_sprite(0,1);
+        pos_sx = cord_morrox + 4*dirx;
+        pos_sy = cord_morroy + 4*diry;
+        if(cord_morrox > 599){cord_morrox = 0 + cord_morrox - W; }
+        if(cord_morrox < 0){cord_morrox = W - cord_morrox; }
+    }
+    if(_mapa[pos_sx][pos_sy] > 0){
+        std::cout << "giro4" << "\n";
+        set_dir(0,1);
+        cambiar_posicion_sprite(0,-1);
+        pos_sx = cord_morrox + 4*dirx;
+        pos_sy = cord_morroy + 4*diry;
+        if(cord_morrox > 599){cord_morrox = 0 + cord_morrox - W; }
+        if(cord_morrox < 0){cord_morrox = W - cord_morrox; }
+    }
+    
+    posx = posx + kVel * dirx;
+    posy = posy + kVel * diry;
+    
+    if(posx < 0){ posx = W; }
+    if(posx > W){ posx = 0; }
+    if(posy < 0){ posy = H; }
+    if(posy > H){ posy = 0; }
+        
+    sprite.setPosition(posx,posy);
+    
+    pos_sx =0;
+    pos_sy =0;
 }
 
 void Coche::situar_morro(){
