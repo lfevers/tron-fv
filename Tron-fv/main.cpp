@@ -5,7 +5,7 @@
 #define W 600
 #define H 480
 #define kVel 4
-#define ancho_morro 20
+#define ancho_morro 10
 
 #include "Coche.h"
 
@@ -262,60 +262,129 @@ void Coche::movimiento_controlado(){
         posx = posx + kVel * dirx;
         posy = posy + kVel * diry;
 
-        if(posx < 0){ posx = W; }
-        if(posx > W){ posx = 0; }
-        if(posy < 0){ posy = H; }
-        if(posy > H){ posy = 0; }
+        if(posx < 0){ posx = W-1; }
+        if(posx > W-1){ posx = 0; }
+        if(posy < 0){ posy = H-1; }
+        if(posy > H-1){ posy = 0; }
         
         sprite.setPosition(posx,posy);
+        std::cout << posx << "," << posy << "\n";
         
 }
 
 void Coche::movimiento_automatico(int _mapa[W][H]){
-    int pos_sx = cord_morrox + 4*dirx;
-    int pos_sy = cord_morroy + 4*diry;
-    std::cout << "MAPA: " << pos_sx << ","<<  pos_sy << ": " << _mapa[pos_sx][pos_sy] <<" \n";
-    if(cord_morrox > 599){cord_morrox = 0 + cord_morrox - W; }
-    if(cord_morrox < 0){cord_morrox = W - cord_morrox; }
+    int pos_sx = posx + 20*dirx;
+    int pos_sy = posy + 20*diry;
     
-    std::cout << "pos: " << posx << ","<<  posy << " \n";
-    std::cout << "MAPA: " << pos_sx << ","<<  pos_sy << ": " << _mapa[pos_sx][pos_sy] <<" \n";
+    int giro = 4; // 0 derecha || 1 arriba || 2 izquierda || 3 abajo || 4 ninguno  
+    bool libre = true;
     
-    if(_mapa[pos_sx][pos_sy] > 0){
-        std::cout << "giro1" << "\n";
-        set_dir(1,0);
-        cambiar_posicion_sprite(1,1);
-        pos_sx = cord_morrox + 4*dirx;
-        pos_sy = cord_morroy + 4*diry;
-        if(cord_morrox > 599){cord_morrox = 0 + cord_morrox - W; }
-        if(cord_morrox < 0){cord_morrox = W - cord_morrox; }
-    }
-    if(_mapa[pos_sx][pos_sy] > 0){
-        std::cout << "giro2" << "\n";
-        set_dir(-1,0);
-        cambiar_posicion_sprite(1,-1);
-        pos_sx = cord_morrox + 4*dirx;
-        pos_sy = cord_morroy + 4*diry;
-        if(cord_morrox > 599){cord_morrox = 0 + cord_morrox - W; }
-        if(cord_morrox < 0){cord_morrox = W - cord_morrox; }
-    }
-    if(_mapa[pos_sx][pos_sy] > 0){
-        std::cout << "giro3" << "\n";
-        set_dir(0,-1);
-        cambiar_posicion_sprite(0,1);
-        pos_sx = cord_morrox + 4*dirx;
-        pos_sy = cord_morroy + 4*diry;
-        if(cord_morrox > 599){cord_morrox = 0 + cord_morrox - W; }
-        if(cord_morrox < 0){cord_morrox = W - cord_morrox; }
-    }
-    if(_mapa[pos_sx][pos_sy] > 0){
-        std::cout << "giro4" << "\n";
-        set_dir(0,1);
-        cambiar_posicion_sprite(0,-1);
-        pos_sx = cord_morrox + 4*dirx;
-        pos_sy = cord_morroy + 4*diry;
-        if(cord_morrox > 599){cord_morrox = 0 + cord_morrox - W; }
-        if(cord_morrox < 0){cord_morrox = W - cord_morrox; }
+    if(_mapa[pos_sx][pos_sy] == 1 || _mapa[pos_sx][pos_sy] == 2 ){
+    
+        //compruebo derecha 
+        pos_sx = posx + 20;
+        pos_sy = posy;
+        if(dirx != -1){
+            for(int c = -5; c < 5 ; c++){
+                if (_mapa[pos_sx][pos_sy+c] == 1 || _mapa[pos_sx][pos_sy+c] == 2){
+                    libre = false;
+                }
+            }      
+        }
+        else{
+            libre = false;
+        }
+        if(libre == true){
+            std::cout << "DERECHA LIBRE \n";
+            giro = 0;
+        }
+        
+        
+        //compruebo arriba
+        libre = true;
+        pos_sx = posx;
+        pos_sy = posy - 20; 
+        if(diry != 1){
+            for(int c = -5; c < 5 ; c++){
+                 if (_mapa[pos_sx+c][pos_sy] == 1 || _mapa[pos_sx+c][pos_sy] == 2){
+                     libre = false;
+                }
+            }
+        }
+        else{
+            libre = false;
+        }
+        if(libre == true){
+            std::cout << "ARRIBA LIBRE \n";
+            giro = 1;
+        }
+
+        //compruebo izquierda
+        libre = true;
+        pos_sx = posx - 20;
+        pos_sy = posy; 
+        if(dirx != 1){
+            for(int c = -5; c < 5 ; c++){
+                 if (_mapa[pos_sx][pos_sy+c] == 1 || _mapa[pos_sx][pos_sy+c] == 2){
+                     libre = false;
+                }
+            }
+        }
+        else{
+            libre = false;
+        }
+        if(libre == true){
+            std::cout << "IZQUIERDA LIBRE \n";
+            giro = 2;
+        }
+    
+        //compruebo abajo
+        libre = true;
+        pos_sx = posx;
+        pos_sy = posy + 20; 
+        if(diry != -1){
+            for(int c = -5; c < 5 ; c++){
+                 if (_mapa[pos_sx+c][pos_sy] == 1 || _mapa[pos_sx+c][pos_sy] == 2){
+                     libre = false;
+                }
+            }
+        }
+        else{
+            libre = false;
+        }
+        if(libre == true){
+            std::cout << "ABAJO LIBRE \n";
+            giro = 3;
+        }
+        
+        std::cout << "--------------------- \n";
+        
+        
+        
+        if(giro == 0){
+            //giro a la derecha
+            set_dir(1,0);
+            cambiar_posicion_sprite(1,1);
+        }
+    
+        if(giro == 1){
+            //giro a arriba
+            set_dir(0,-1);
+            cambiar_posicion_sprite(0,1);
+        }
+    
+        if(giro == 2){
+            //giro a la izquierda
+            set_dir(-1,0);
+            cambiar_posicion_sprite(1,-1);
+        }
+    
+        if(giro == 3){
+            //giro a abajo
+            set_dir(0,1); 
+            cambiar_posicion_sprite(0,-1);
+        }
+    
     }
     
     posx = posx + kVel * dirx;
