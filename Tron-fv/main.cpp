@@ -290,9 +290,9 @@ void Coche::movimiento_automatico(int _mapa[W][H]){
     int pos_sx = posx + 20*dirx;
     int pos_sy = posy + 20*diry;
     
-    if(pos_sx < 0){ pos_sx = W-20;}
+    if(pos_sx < 0){ pos_sx = W-pos_sx;}
     if(pos_sx > W-1){ pos_sx = 0 + (pos_sx - W); }
-    if(pos_sy < 0){ pos_sy = H-20;}
+    if(pos_sy < 0){ pos_sy = H-pos_sx;}
     if(pos_sy > H-1){ pos_sy = 0 + (pos_sy - H); }
     
     if(_mapa[pos_sx][pos_sy] == 1 || _mapa[pos_sx][pos_sy] == 2){
@@ -397,9 +397,9 @@ void Coche::movimiento_automatico(int _mapa[W][H]){
     posx = posx + kVel * dirx;
     posy = posy + kVel * diry;
     
-    if(posx < 0){ posx = W; }
+    if(posx < 0){ posx = W-4; }
     if(posx > W){ posx = 0; }
-    if(posy < 0){ posy = H; }
+    if(posy < 0){ posy = H-4; }
     if(posy > H){ posy = 0; }
         
     sprite.setPosition(posx,posy);
