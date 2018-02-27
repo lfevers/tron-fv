@@ -6,6 +6,7 @@
 #define H 480
 #define kVel 4
 #define ancho_morro 10
+#define largo_morro 14
 
 #include "Coche.h"
 
@@ -193,14 +194,12 @@ int main()
 }
 
 Coche::Coche(int _njugador){
+    int dir_aux = 1;
     
     n_jugador = _njugador;
-       
-    cord_morrox;
-    cord_morroy;
     
     morro = sf::RectangleShape(sf::Vector2f(ancho_morro, 1));
-    morro.setOrigin(ancho_morro/2,1);
+    morro.setOrigin(ancho_morro/2,0);
     morro.setFillColor(sf::Color::Red);
     
         
@@ -223,6 +222,9 @@ Coche::Coche(int _njugador){
         posy =440;
         dirx = 0;
         diry = -1;
+        cord_morrox = posx;
+        cord_morroy = posy -16;
+    
     }
     else{
         color = sf::Color::Yellow;
@@ -230,11 +232,16 @@ Coche::Coche(int _njugador){
         posy =40;
         dirx = 0;
         diry = 1;
+        cord_morrox = posx;
+        cord_morroy = posy +16;
+        dir_aux = -1;
     }
+    
+    
     
     // Lo dispongo en el centro de la pantalla
     sprite.setPosition(posx, posy);
-    
+    sprite.setScale(1,dir_aux); 
     
 }
 
@@ -406,8 +413,8 @@ void Coche::situar_morro(){
         if(dirx == 1){//derecha
            cord_morrox = posx+16; 
            cord_morroy = posy;
-           morro.setOrigin(1,ancho_morro/2);
-           morro.setSize(sf::Vector2f(1, ancho_morro));
+           morro.setOrigin(largo_morro,ancho_morro/2);
+           morro.setSize(sf::Vector2f(largo_morro, ancho_morro));
            morro.setPosition(cord_morrox,cord_morroy);
           
            
@@ -415,8 +422,8 @@ void Coche::situar_morro(){
         if(dirx == -1){//izquierda
            cord_morrox = posx-16; 
            cord_morroy = posy;
-           morro.setOrigin(1,ancho_morro/2);
-           morro.setSize(sf::Vector2f(1, ancho_morro));
+           morro.setOrigin(0,ancho_morro/2);
+           morro.setSize(sf::Vector2f(largo_morro, ancho_morro));
            morro.setPosition(cord_morrox,cord_morroy);
            
            
@@ -424,16 +431,16 @@ void Coche::situar_morro(){
         if(diry == 1){//abajo
            cord_morrox = posx; 
            cord_morroy = posy +16;
-           morro.setOrigin(ancho_morro/2,1);
-           morro.setSize(sf::Vector2f(ancho_morro, 1));
+           morro.setOrigin(ancho_morro/2,largo_morro);
+           morro.setSize(sf::Vector2f(ancho_morro, largo_morro));
            morro.setPosition(cord_morrox,cord_morroy);
            
         }
         if(diry == -1){//arriba
            cord_morrox = posx; 
            cord_morroy = posy -16;
-           morro.setOrigin(ancho_morro/2,1);
-           morro.setSize(sf::Vector2f(ancho_morro, 1));
+           morro.setOrigin(ancho_morro/2,0);
+           morro.setSize(sf::Vector2f(ancho_morro, largo_morro));
            morro.setPosition(cord_morrox,cord_morroy);   
         }
 }
