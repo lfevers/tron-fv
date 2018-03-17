@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <SFML/Graphics.hpp>
+#include <sstream> 
 
 #define W 600
 #define H 480
@@ -12,7 +13,23 @@
 
 int main()
 {
+    // Creamos el texto que muestra la puntuacion
+    sf::Font font;
+    font.loadFromFile("arial.ttf");
+    sf::Text time("Tiempo: " ,font);
+    time.setCharacterSize(20);
+    time.setStyle(sf::Text::Bold);
+    time.setColor(sf::Color::Red);
+    time.setPosition(5,10);
+    
+    sf::Text tiempo_acumulado("0" ,font);
+    tiempo_acumulado.setCharacterSize(20);
+    tiempo_acumulado.setStyle(sf::Text::Bold);
+    tiempo_acumulado.setColor(sf::Color::Red);
+    tiempo_acumulado.setPosition(90,10);
+    
     sf::Clock clock;
+    sf::Clock clock_total;
     
     //DECLARAMOS LOS COCHES
     Coche coche1 = Coche(0);
@@ -47,6 +64,7 @@ int main()
     //Bucle del juego
     while (window.isOpen())
     {
+        std::stringstream ss;
         clock.restart();
         //Bucle de obtención de eventos
         sf::Event event;
@@ -182,10 +200,18 @@ int main()
         //window.draw(*sprite);
         
         window.draw(coche1.getSprite());
-        window.draw(coche1.getMorro()); //VER COLISIONADOR DEL COCHE
+        //window.draw(coche1.getMorro()); //VER COLISIONADOR DEL COCHE
         
         window.draw(coche2.getSprite());
-        window.draw(coche2.getMorro()); //VER COLISIONADOR DEL COCHE
+        //window.draw(coche2.getMorro()); //VER COLISIONADOR DEL COCHE
+        
+        sf::Time times = sf::seconds(0);
+        times = clock_total.getElapsedTime();
+        ss<<static_cast<int>(times.asSeconds());
+        tiempo_acumulado.setString(ss.str());
+        
+        window.draw(time);
+        window.draw(tiempo_acumulado);
         
         window.display();
         
