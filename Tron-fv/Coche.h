@@ -30,6 +30,7 @@ private:
     
 public:
     Coche(int);
+    void restart(int);
     void cambiar_posicion_sprite(int,int);
     void movimiento_controlado();
     void movimiento_automatico(int[W][H]);

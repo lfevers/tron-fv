@@ -15,18 +15,30 @@ int main()
 {
     // Creamos el texto que muestra la puntuacion
     sf::Font font;
-    font.loadFromFile("arial.ttf");
+    font.loadFromFile("8-bit-pusab.ttf");
     sf::Text time("Tiempo: " ,font);
-    time.setCharacterSize(20);
+    time.setCharacterSize(12);
     time.setStyle(sf::Text::Bold);
     time.setColor(sf::Color::Red);
     time.setPosition(5,10);
     
     sf::Text tiempo_acumulado("0" ,font);
-    tiempo_acumulado.setCharacterSize(20);
+    tiempo_acumulado.setCharacterSize(12);
     tiempo_acumulado.setStyle(sf::Text::Bold);
     tiempo_acumulado.setColor(sf::Color::Red);
     tiempo_acumulado.setPosition(90,10);
+    
+    sf::Text resultado("HAS GANADO",font);
+    resultado.setCharacterSize(40);
+    resultado.setStyle(sf::Text::Bold);
+    resultado.setColor(sf::Color::Red);
+    resultado.setPosition(20,140);
+    
+    sf::Text instruccion("Pulsa Q para salir o Space para reiniciar",font);
+    instruccion.setCharacterSize(12);
+    instruccion.setStyle(sf::Text::Bold);
+    instruccion.setColor(sf::Color::Red);
+    instruccion.setPosition(20,300);
     
     sf::Clock clock;
     sf::Clock clock_total;
@@ -60,169 +72,240 @@ int main()
     //Y creo el spritesheet a partir de la imagen anterior
 
     sf::Sprite s_background(tex2);
-
+    bool juego = true;
     //Bucle del juego
     while (window.isOpen())
     {
-        std::stringstream ss;
-        clock.restart();
-        //Bucle de obtención de eventos
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            
-            switch(event.type){
-                
-                //Si se recibe el evento de cerrar la ventana la cierro
-                case sf::Event::Closed:
-                    window.close();
+        if(juego == true){
+            std::stringstream ss;
+            clock.restart();
+            //Bucle de obtención de eventos
+            sf::Event event;
+            while (window.pollEvent(event))
+            {
+
+                switch(event.type){
+
+                    //Si se recibe el evento de cerrar la ventana la cierro
+                    case sf::Event::Closed:
+                        window.close();
+                        break;
+
+                    //Se pulsó una tecla, imprimo su codigo
+                    case sf::Event::KeyPressed:
+
+                        //Verifico si se pulsa alguna tecla de movimiento
+                        switch(event.key.code) {
+
+                            //Mapeo del cursor
+                            case sf::Keyboard::Right:
+                                if(coche1.get_dirx() == -1 && coche1.get_diry() == 0){}
+                                else{
+                                    coche1.set_dir(1,0);
+                                    coche1.cambiar_posicion_sprite(1,1);
+                                }
+                            break;
+
+                            case sf::Keyboard::Left:
+                                if(coche1.get_dirx() == 1 && coche1.get_diry() == 0){}
+                                else{
+                                    coche1.set_dir(-1,0);
+                                    coche1.cambiar_posicion_sprite(1,-1);
+                                }
+                                //Reflejo vertical
+
+                            break;
+
+                            case sf::Keyboard::Up:
+                                if(coche1.get_dirx() == 0 && coche1.get_diry() == 1){}
+                                else{
+                                    coche1.set_dir(0,-1);
+                                    coche1.cambiar_posicion_sprite(0,1);
+                                }
+
+                            break;
+
+                            case sf::Keyboard::Down:
+                                if(coche1.get_dirx() == 0 && coche1.get_diry() == -1){}
+                                else{
+                                    coche1.set_dir(0,1); 
+                                    coche1.cambiar_posicion_sprite(0,-1);
+                                }
+
+                            break;
+
+                            //Tecla ESC para salir
+                            case sf::Keyboard::Q:
+                                window.close();
+                            break;
+
+                            //Cualquier tecla desconocida se imprime por pantalla su código
+                            default:
+                                std::cout << event.key.code << std::endl;
+                            break;
+
+                        }
+
+                }
+
+            }
+
+            coche1.movimiento_controlado();
+            coche1.situar_morro();
+
+            coche2.movimiento_automatico(mapa);
+            coche2.situar_morro();
+
+            mapa[coche1.get_x()][coche1.get_y()] = 1;
+            mapa[coche2.get_x()][coche2.get_y()] = 2;
+
+            window.clear();
+            window.draw(s_background);
+
+            bool scape = false;
+             for(int mx = 0; mx < W;mx++){
+                if(scape == true){
+                    scape = false;
                     break;
-                    
-                //Se pulsó una tecla, imprimo su codigo
-                case sf::Event::KeyPressed:
-                    
-                    //Verifico si se pulsa alguna tecla de movimiento
-                    switch(event.key.code) {
-                        
-                        //Mapeo del cursor
-                        case sf::Keyboard::Right:
-                            if(coche1.get_dirx() == -1 && coche1.get_diry() == 0){}
-                            else{
-                                coche1.set_dir(1,0);
-                                coche1.cambiar_posicion_sprite(1,1);
-                            }
-                        break;
+                }
+                for(int my = 0; my < H;my++){
+                    if(mapa[mx][my] == 1){
 
-                        case sf::Keyboard::Left:
-                            if(coche1.get_dirx() == 1 && coche1.get_diry() == 0){}
-                            else{
-                                coche1.set_dir(-1,0);
-                                coche1.cambiar_posicion_sprite(1,-1);
-                            }
-                            //Reflejo vertical
-                            
-                        break;
-                        
-                        case sf::Keyboard::Up:
-                            if(coche1.get_dirx() == 0 && coche1.get_diry() == 1){}
-                            else{
-                                coche1.set_dir(0,-1);
-                                coche1.cambiar_posicion_sprite(0,1);
-                            }
-                            
-                        break;
-                        
-                        case sf::Keyboard::Down:
-                            if(coche1.get_dirx() == 0 && coche1.get_diry() == -1){}
-                            else{
-                                coche1.set_dir(0,1); 
-                                coche1.cambiar_posicion_sprite(0,-1);
-                            }
-                            
-                        break;
-                        
-                        //Tecla ESC para salir
-                        case sf::Keyboard::Escape:
-                            window.close();
-                        break;
-                        
-                        //Cualquier tecla desconocida se imprime por pantalla su código
-                        default:
-                            std::cout << event.key.code << std::endl;
-                        break;
-                              
+                        if(coche1.getMorro().getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
+                            resultado.setString("HAS PERDIDO");
+                            resultado.setColor(sf::Color::Red);
+                            juego = false;
+                            scape = true;
+                            break;
+                        }
+
+                        else if(coche2.getMorro().getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
+                            resultado.setString("HAS GANADO");
+                            resultado.setColor(sf::Color::Green);
+                            juego = false;
+                            scape = true;
+                            break;
+                        }
+
+                        else{
+                            mapa_rastro[mx/4][my/4].setFillColor(coche1.getColor());
+                            window.draw(mapa_rastro[mx/4][my/4]); 
+                            //std::cout << "Pos rastro:" << mapa_rastro[mx/4][my/4].getPosition().x << "," << mapa_rastro[mx/4][my/4].getPosition().y << "\n";
+                        }
+
                     }
 
+                    if(mapa[mx][my] == 2){
+
+                        if(coche2.getMorro().getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
+                            resultado.setString("HAS GANADO");
+                            resultado.setColor(sf::Color::Green);
+                            juego = false;
+                            scape = true;
+                            break;
+                        }
+
+                        else if(coche1.getMorro().getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
+                            resultado.setString("HAS PERDIDO");
+                            resultado.setColor(sf::Color::Red);
+                            juego = false;
+                            scape = true;
+                            break;
+                        }
+                        else{
+                            mapa_rastro[mx/4][my/4].setFillColor(coche2.getColor());
+                            window.draw(mapa_rastro[mx/4][my/4]);
+                        }
+                    }
+
+                }
             }
-            
-        }
-        
-        coche1.movimiento_controlado();
-        coche1.situar_morro();
-        
-        coche2.movimiento_automatico(mapa);
-        coche2.situar_morro();
-        
-        mapa[coche1.get_x()][coche1.get_y()] = 1;
-        mapa[coche2.get_x()][coche2.get_y()] = 2;
-        
-        window.clear();
-        window.draw(s_background);
-        
-        
-         for(int mx = 0; mx < W;mx++){
-            for(int my = 0; my < H;my++){
-                if(mapa[mx][my] == 1){
-                    
-                    if(coche1.getMorro().getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
-                        std::cout << "HAS PERDIDO :( \n" ;
-                        window.close();
-                        break;
-                    }
-                    
-                    else if(coche2.getMorro().getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
-                        std::cout << "HAS GANADO :) \n" ;
-                        window.close();
-                        break;
-                    }
-                    
-                    else{
-                        mapa_rastro[mx/4][my/4].setFillColor(coche1.getColor());
-                        window.draw(mapa_rastro[mx/4][my/4]); 
-                        //std::cout << "Pos rastro:" << mapa_rastro[mx/4][my/4].getPosition().x << "," << mapa_rastro[mx/4][my/4].getPosition().y << "\n";
-                    }
-                    
-                }
-                
-                if(mapa[mx][my] == 2){
-                    
-                    if(coche2.getMorro().getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
-                        std::cout << "HAS GANADO :) \n" ;
-                        window.close();
-                        break;
-                    }
-                    
-                    else if(coche1.getMorro().getGlobalBounds().intersects(mapa_rastro[mx/4][my/4].getGlobalBounds())){
-                        std::cout << "HAS PERDIDO :( \n" ;
-                        window.close();
-                        break;
-                    }
-                    else{
-                        mapa_rastro[mx/4][my/4].setFillColor(coche2.getColor());
-                        window.draw(mapa_rastro[mx/4][my/4]);
-                    }
-                }
-                
+
+            //sf::Sprite *sprite = coche1.getSprite(); 
+            //window.draw(*sprite);
+
+            window.draw(coche1.getSprite());
+            //window.draw(coche1.getMorro()); //VER COLISIONADOR DEL COCHE
+
+            window.draw(coche2.getSprite());
+            //window.draw(coche2.getMorro()); //VER COLISIONADOR DEL COCHE
+
+            sf::Time times = sf::seconds(0);
+            times = clock_total.getElapsedTime();
+            ss<<static_cast<int>(times.asSeconds());
+            tiempo_acumulado.setString(ss.str());
+
+            window.draw(time);
+            window.draw(tiempo_acumulado);
+
+            window.display();
+
+            //std::cout << "----------------------- \n";
+
+            sf::Time tiempo = sf::milliseconds(0);
+            sf::Time tiempo_max = sf::milliseconds(30);
+            while (tiempo < tiempo_max){
+                tiempo = clock.getElapsedTime();
             }
         }
-         
-        //sf::Sprite *sprite = coche1.getSprite(); 
-        //window.draw(*sprite);
-        
-        window.draw(coche1.getSprite());
-        //window.draw(coche1.getMorro()); //VER COLISIONADOR DEL COCHE
-        
-        window.draw(coche2.getSprite());
-        //window.draw(coche2.getMorro()); //VER COLISIONADOR DEL COCHE
-        
-        sf::Time times = sf::seconds(0);
-        times = clock_total.getElapsedTime();
-        ss<<static_cast<int>(times.asSeconds());
-        tiempo_acumulado.setString(ss.str());
-        
-        window.draw(time);
-        window.draw(tiempo_acumulado);
-        
-        window.display();
-        
-        //std::cout << "----------------------- \n";
-        
-        sf::Time tiempo = sf::milliseconds(0);
-        sf::Time tiempo_max = sf::milliseconds(30);
-        while (tiempo < tiempo_max){
-            tiempo = clock.getElapsedTime();
+        else{
+            sf::Event event;
+            while (window.pollEvent(event))
+            {
+
+                switch(event.type){
+
+                    //Si se recibe el evento de cerrar la ventana la cierro
+                    case sf::Event::Closed:
+                        window.close();
+                        break;
+
+                    //Se pulsó una tecla, imprimo su codigo
+                    case sf::Event::KeyPressed:
+
+                        //Verifico si se pulsa alguna tecla de movimiento
+                        switch(event.key.code) {
+
+                            //Mapeo del cursor
+                            case sf::Keyboard::Space:
+                                juego = true;
+                            break;
+                            
+                            case sf::Keyboard::Q:
+                                window.close();
+                            //Cualquier tecla desconocida se imprime por pantalla su código
+                            default:
+                                std::cout << event.key.code << std::endl;
+                            break;
+
+                        }
+
+                }
+
+            }
+            for(int mx = 0; mx < W;mx++){
+                for(int my = 0; my < H;my++){
+                    mapa[mx][my] = 0;
+                }
+            }
+            for(int mx = 0; mx < W/4;mx++){
+                for(int my = 0; my < H/4;my++){
+                    mapa_rastro[mx][my] = sf::RectangleShape(sf::Vector2f(4, 4));
+                    mapa_rastro[mx][my].setOrigin(2,2);
+                    mapa_rastro[mx][my].setPosition(mx*4,my*4);
+                }
+            }
+            coche1.restart(0);
+            coche2.restart(1);
+            clock_total.restart();
+            window.clear();
+            window.draw(s_background);
+            window.draw(resultado);
+            window.draw(instruccion);
+            window.draw(time);
+            window.draw(tiempo_acumulado);
+            window.display();
         }
-       
     }
     
     return 0;
@@ -248,10 +331,15 @@ Coche::Coche(int _njugador){
     
     //Le pongo el centroide donde corresponde
     sprite.setOrigin(32/2,32/2);
-    //Cojo el sprite que me interesa por defecto del sheet
-    sprite.setTextureRect(sf::IntRect(0*32, n_jugador*32, 32, 32));
+ 
+    restart(n_jugador);
+
     
-    if(n_jugador == 0){
+}
+
+void Coche::restart(int _njugador){
+    int dir_aux = 1;
+    if(_njugador == 0){
         color = sf::Color::Cyan;
         posx =320;
         posy =440;
@@ -272,14 +360,10 @@ Coche::Coche(int _njugador){
         dir_aux = -1;
     }
     
-    
-    
-    // Lo dispongo en el centro de la pantalla
-    sprite.setPosition(posx, posy);
+    sprite.setTextureRect(sf::IntRect(0*32, _njugador*32, 32, 32));
     sprite.setScale(1,dir_aux); 
-    
+    sprite.setPosition(posx, posy);
 }
-
 
 void Coche::cambiar_posicion_sprite(int _posicion, int _direccion){
     //_posicion     0 == UP/DOWN     1 == RIGHT/LEFT 
@@ -341,7 +425,7 @@ void Coche::movimiento_automatico(int _mapa[W][H]){
             if(pos_sy > H-1){ pos_sy = 0 + (pos_sy - H); }
             
             if(_mapa[pos_sx][pos_sy] == 1 || _mapa[pos_sx][pos_sy] == 2){
-                std::cout << "Derecha ocupada \n";
+               
                 libres[0] = false;
             } 
             
@@ -354,7 +438,7 @@ void Coche::movimiento_automatico(int _mapa[W][H]){
             if(pos_sy > H-1){ pos_sy = 0 + (pos_sy - H); }
             
             if(_mapa[pos_sx][pos_sy] == 1 || _mapa[posx - p][pos_sy] == 2){
-                std::cout << "Izquierda ocupada \n";
+                
                 libres[1] = false;
             }
             
@@ -367,7 +451,7 @@ void Coche::movimiento_automatico(int _mapa[W][H]){
             if(pos_sy > H-1){ pos_sy = 0 + (pos_sy - H); }
             
             if(_mapa[pos_sx][pos_sy] == 1 || _mapa[pos_sx][pos_sy] == 2){
-                std::cout << "Abajo ocupada \n";
+                
                 libres[2] = false;
             }
             
@@ -380,7 +464,7 @@ void Coche::movimiento_automatico(int _mapa[W][H]){
             if(pos_sy > H-1){ pos_sy = 0 + (pos_sy - H); }
                        
             if(_mapa[pos_sx][pos_sy] == 1 || _mapa[pos_sx][pos_sy] == 2){
-                std::cout << "Arriba ocupada \n";
+                
                 libres[3] = false;
             }
         }
@@ -390,25 +474,25 @@ void Coche::movimiento_automatico(int _mapa[W][H]){
                 std::cout << n2 << "\n";
                 switch (n2){
                     case 0:
-                        std::cout << "Derecha libre \n";
+                        
                         set_dir(1,0);
                         cambiar_posicion_sprite(1,1);
                         break;
                         
                     case 1:
-                        std::cout << "Izquierda libre \n";
+                        
                         set_dir(-1,0);
                         cambiar_posicion_sprite(1,-1);
                         break;
                         
                     case 2:
-                        std::cout << "Abajo libre \n";
+                        
                         set_dir(0,1);
                         cambiar_posicion_sprite(0,-1);
                         break;
                         
                     case 3:
-                        std::cout << "Arriba libre \n";
+                        
                         set_dir(0,-1);
                         cambiar_posicion_sprite(0,1);
                         break;
