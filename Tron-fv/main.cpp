@@ -342,7 +342,7 @@ void Coche::restart(int _njugador){
     if(_njugador == 0){
         color = sf::Color::Cyan;
         posx =320;
-        posy =440;
+        posy =180;
         dirx = 0;
         diry = -1;
         cord_morrox = posx;
@@ -399,10 +399,10 @@ void Coche::movimiento_controlado(){
 void Coche::movimiento_automatico(int _mapa[W][H]){
     int pos_sx = posx + 20*dirx;
     int pos_sy = posy + 20*diry;
-    
+        
     if(pos_sx < 0){ pos_sx = W-pos_sx;}
     if(pos_sx > W-1){ pos_sx = 0 + (pos_sx - W); }
-    if(pos_sy < 0){ pos_sy = H-pos_sx;}
+    if(pos_sy < 0){ pos_sy = H+pos_sy;}
     if(pos_sy > H-1){ pos_sy = 0 + (pos_sy - H); }
     
     if(_mapa[pos_sx][pos_sy] == 1 || _mapa[pos_sx][pos_sy] == 2){
@@ -425,11 +425,10 @@ void Coche::movimiento_automatico(int _mapa[W][H]){
             if(pos_sy > H-1){ pos_sy = 0 + (pos_sy - H); }
             
             if(_mapa[pos_sx][pos_sy] == 1 || _mapa[pos_sx][pos_sy] == 2){
-               
+                std::cout << "Derecha ocupada \n";
                 libres[0] = false;
             } 
-            
-            pos_sx = posx - p; 
+             pos_sx = posx - p; 
             pos_sy = posy;
             
             if(pos_sx < 0){ pos_sx = W-p;}
@@ -438,7 +437,7 @@ void Coche::movimiento_automatico(int _mapa[W][H]){
             if(pos_sy > H-1){ pos_sy = 0 + (pos_sy - H); }
             
             if(_mapa[pos_sx][pos_sy] == 1 || _mapa[posx - p][pos_sy] == 2){
-                
+                std::cout << "Izquierda ocupada \n";
                 libres[1] = false;
             }
             
@@ -451,7 +450,7 @@ void Coche::movimiento_automatico(int _mapa[W][H]){
             if(pos_sy > H-1){ pos_sy = 0 + (pos_sy - H); }
             
             if(_mapa[pos_sx][pos_sy] == 1 || _mapa[pos_sx][pos_sy] == 2){
-                
+                std::cout << "Abajo ocupada \n";
                 libres[2] = false;
             }
             
@@ -464,7 +463,7 @@ void Coche::movimiento_automatico(int _mapa[W][H]){
             if(pos_sy > H-1){ pos_sy = 0 + (pos_sy - H); }
                        
             if(_mapa[pos_sx][pos_sy] == 1 || _mapa[pos_sx][pos_sy] == 2){
-                
+                std::cout << "Arriba ocupada \n";
                 libres[3] = false;
             }
         }
@@ -474,25 +473,25 @@ void Coche::movimiento_automatico(int _mapa[W][H]){
                 std::cout << n2 << "\n";
                 switch (n2){
                     case 0:
-                        
+                        std::cout << "Derecha libre \n";
                         set_dir(1,0);
                         cambiar_posicion_sprite(1,1);
                         break;
                         
                     case 1:
-                        
+                        std::cout << "Izquierda libre \n";
                         set_dir(-1,0);
                         cambiar_posicion_sprite(1,-1);
                         break;
                         
-                    case 2:
-                        
+                     case 2:
+                        std::cout << "Abajo libre \n";
                         set_dir(0,1);
                         cambiar_posicion_sprite(0,-1);
                         break;
                         
                     case 3:
-                        
+                        std::cout << "Arriba libre \n";
                         set_dir(0,-1);
                         cambiar_posicion_sprite(0,1);
                         break;
